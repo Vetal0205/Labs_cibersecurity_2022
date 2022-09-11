@@ -1,0 +1,15 @@
+D:\Prog\Labs\LabsC#\Practice№1\obj\Debug\net6.0\Practice№1.csproj.AssemblyReference.cache
+D:\Prog\Labs\LabsC#\Practice№1\obj\Debug\net6.0\Practice№1.GeneratedMSBuildEditorConfig.editorconfig
+D:\Prog\Labs\LabsC#\Practice№1\obj\Debug\net6.0\Practice№1.AssemblyInfoInputs.cache
+D:\Prog\Labs\LabsC#\Practice№1\obj\Debug\net6.0\Practice№1.AssemblyInfo.cs
+D:\Prog\Labs\LabsC#\Practice№1\obj\Debug\net6.0\Practice№1.csproj.CoreCompileInputs.cache
+D:\Prog\Labs\LabsC#\Practice№1\bin\Debug\net6.0\Practice№1.exe
+D:\Prog\Labs\LabsC#\Practice№1\bin\Debug\net6.0\Practice№1.deps.json
+D:\Prog\Labs\LabsC#\Practice№1\bin\Debug\net6.0\Practice№1.runtimeconfig.json
+D:\Prog\Labs\LabsC#\Practice№1\bin\Debug\net6.0\Practice№1.dll
+D:\Prog\Labs\LabsC#\Practice№1\bin\Debug\net6.0\Practice№1.pdb
+D:\Prog\Labs\LabsC#\Practice№1\obj\Debug\net6.0\Practice№1.dll
+D:\Prog\Labs\LabsC#\Practice№1\obj\Debug\net6.0\refint\Practice№1.dll
+D:\Prog\Labs\LabsC#\Practice№1\obj\Debug\net6.0\Practice№1.pdb
+D:\Prog\Labs\LabsC#\Practice№1\obj\Debug\net6.0\Practice№1.genruntimeconfig.cache
+D:\Prog\Labs\LabsC#\Practice№1\obj\Debug\net6.0\ref\Practice№1.dll
