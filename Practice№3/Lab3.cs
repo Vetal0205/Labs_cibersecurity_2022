@@ -237,6 +237,7 @@ class Program
 
                             User newUser = new User(PotentialUser);
                             listofusers.users[listofusers.id] = newUser;
+                            listofusers.id++;
 
                             Console.WriteLine("[#] You have successfully registered! [#]");
                             Console.WriteLine($"\n[#] Your Login: {login_reg} [#]\n\n[#] Password: {password_reg_str} [#]\n\n[#] HMAC sequence {PotentialUser} [#]");
@@ -270,14 +271,15 @@ class Program
                             if (Globals.found == false)
                             {
                                 Console.WriteLine("[!] Incorrect user data. Nothing found [!]");
-                                Globals.found = false;
                                 Console.ReadKey();
                             }
 
+                            Globals.found = false;
+                            
                             login_log = "";
                             password_log_str = "";
                             Array.Clear(password_log);
-                            
+
                             break;
                         case "3":
                             break;
