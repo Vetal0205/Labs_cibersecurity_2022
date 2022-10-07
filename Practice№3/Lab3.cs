@@ -5,19 +5,21 @@ using System.Security.Cryptography;
 struct User
 {
     public string Hmac_seq;
-    public User(string Hmac_seq)
+    public int id;
+    public User(string Hmac_seq, int id)
     {
         this.Hmac_seq = Hmac_seq;
+        this.id = id;
     }
 }
 struct Users
 {
     public User[] users;
-    public int id;
+    public int amount;
     public Users()
     {
         this.users = new User[10];
-        this.id = 0;
+        this.amount = -1;
     }
 
 }
@@ -85,7 +87,8 @@ class Console_Gui
         Console.WriteLine("[=========================]");
         Console.WriteLine(" |       1. Register     |");
         Console.WriteLine(" |       2. Login        |");
-        Console.WriteLine(" |       3. Back         |");
+        Console.WriteLine(" |       3. Print        |");
+        Console.WriteLine(" |       4. Back         |");
         Console.WriteLine("[=========================]");
     }
     public static void MENU_HASH()
@@ -210,44 +213,54 @@ class Program
                     switch (answer_hmac)
                     {
                         case "1":
-                            Console.WriteLine("[*] Enter new login [*]");
-                            string? login_reg = Console.ReadLine();
-                            Console.WriteLine("[*] Enter new password [*]");
-                            string password_reg_str = Console.ReadLine();
-                            byte[] password_reg = Encoding.Unicode.GetBytes(password_reg_str);
-
-                            string PotentialUser = Convert.ToBase64String(Hmac.ComputeHmacsha256(Encoding.UTF8.GetBytes(login_reg), password_reg));
-
-                            for (int i = 0; i < 10; i++)
+                            if (listofusers.amount != 9)
                             {
-                                if (listofusers.users[i].Hmac_seq == PotentialUser)
+                                Console.WriteLine("[*] Enter new login [*]");
+                                string? login_reg = Console.ReadLine();
+                                Console.WriteLine("[*] Enter new password [*]");
+                                string password_reg_str = Console.ReadLine();
+                                byte[] password_reg = Encoding.Unicode.GetBytes(password_reg_str);
+
+                                string PotentialUser = Convert.ToBase64String(Hmac.ComputeHmacsha256(Encoding.UTF8.GetBytes(login_reg), password_reg));
+
+                                for (int i = 0; i < 10; i++)
                                 {
-                                    Console.WriteLine("[!] This login is already exists [!]");
-                                    Globals.exists = true;
-                                    Console.ReadKey();
+                                    if (listofusers.users[i].Hmac_seq == PotentialUser)
+                                    {
+                                        Console.WriteLine("[!] This login is already exists [!]");
+                                        Globals.exists = true;
+                                        Console.ReadKey();
+                                        break;
+                                    }
+                                }
+
+                                if (Globals.exists == true)
+                                {
+                                    Globals.exists = false;
                                     break;
                                 }
-                            }
 
-                            if (Globals.exists == true)
+                                listofusers.amount++;
+                                User newUser = new User(PotentialUser, listofusers.amount);
+                                listofusers.users[listofusers.amount] = newUser;
+
+                                Console.WriteLine("[#] You have successfully registered! [#]");
+                                Console.WriteLine($"\n[#] Your Login: {login_reg} [#]\n\n[#] Password: {password_reg_str} [#]\n\n[#] HMAC sequence {PotentialUser} [#]");
+                                Console.ReadKey();
+
+                                login_reg = "";
+                                password_reg_str = "";
+                                Array.Clear(password_reg);
+
+                                break;
+                            }
+                            else
                             {
-                                Globals.exists = false;
+                                Console.WriteLine("[!] DB is overfulled [!]");
+                                Console.ReadKey();
                                 break;
                             }
 
-                            User newUser = new User(PotentialUser);
-                            listofusers.users[listofusers.id] = newUser;
-                            listofusers.id++;
-
-                            Console.WriteLine("[#] You have successfully registered! [#]");
-                            Console.WriteLine($"\n[#] Your Login: {login_reg} [#]\n\n[#] Password: {password_reg_str} [#]\n\n[#] HMAC sequence {PotentialUser} [#]");
-                            Console.ReadKey();
-
-                            login_reg = "";
-                            password_reg_str = "";
-                            Array.Clear(password_reg);
-
-                            break;
                         case "2":
                             Console.WriteLine("[*] Enter login [*]");
                             string login_log = Console.ReadLine();
@@ -275,13 +288,28 @@ class Program
                             }
 
                             Globals.found = false;
-                            
+
                             login_log = "";
                             password_log_str = "";
                             Array.Clear(password_log);
 
                             break;
                         case "3":
+                            if (listofusers.amount == -1)
+                            {
+                                Console.WriteLine("[!] DB is Empty [!]");
+                                Console.ReadKey();
+                            }
+                            else
+                            {
+                                for (int i = 0; i <= listofusers.amount; i++)
+                                {
+                                    Console.WriteLine($"[#] amount: {listofusers.users[i].id} - \'{listofusers.users[i].Hmac_seq}\' [#]");
+                                }
+                                Console.ReadKey();
+                            }
+                            break;
+                        case "4":
                             break;
                     }
                     break;
