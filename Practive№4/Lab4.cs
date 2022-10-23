@@ -14,13 +14,13 @@ class Globals
 struct User
 {
     public string login;
-    public string Hmac_seq;
     public byte[] salt;
+    public string password;
     public int id;
-    public User(string login, string Hmac_seq, int id, byte[] salt)
+    public User(int id, string login, string pass, byte[] salt)
     {
         this.login = login;
-        this.Hmac_seq = Hmac_seq;
+        this.password = pass;
         this.id = id;
         this.salt = new byte[salt.Length];
         Array.Copy(salt, this.salt, salt.Length);
@@ -80,6 +80,8 @@ class Program
     static void Main()
     {
         Users listofusers = new Users();
+        Users filter = new Users();
+
         do
         {
             Console.Clear();
@@ -200,18 +202,18 @@ class Program
                             if (listofusers.amount != 9)
                             {
                                 Console.WriteLine("[*] Enter new login [*]");
-                                string? login_reg = Console.ReadLine();
+                                string login_reg_str = Console.ReadLine();
                                 Console.WriteLine("[*] Enter new password [*]");
                                 string password_reg_str = Console.ReadLine();
 
                                 byte[] salt_reg = SaltedHash.GenerateSalt();
                                 byte[] password_reg = PBKDF2.Hash_Password_With_Salt_Sha256_Iteration(Encoding.Unicode.GetBytes(password_reg_str), salt_reg, 30000);
+                                // byte[] login_reg = PBKDF2.Hash_Password_With_Salt_Sha256_Iteration(Encoding.Unicode.GetBytes(login_reg_str), salt_reg, 30000);
 
-                                string PotentialUser = Convert.ToBase64String(Hmac.ComputeHmacsha256(Encoding.UTF8.GetBytes(login_reg), password_reg));
 
                                 for (int i = 0; i < 10; i++)
                                 {
-                                    if (listofusers.users[i].Hmac_seq == PotentialUser)
+                                    if (listofusers.users[i].login == login_reg_str && listofusers.users[i].password == Convert.ToBase64String(password_reg))
                                     {
                                         Console.WriteLine("[!] This login is already exists [!]");
                                         Globals.exists = true;
@@ -226,18 +228,18 @@ class Program
                                 }
 
                                 listofusers.amount++;
-                                User newUser = new User(login_reg, PotentialUser, listofusers.amount, salt_reg);
+                                User newUser = new User(listofusers.amount, login_reg_str, Convert.ToBase64String(password_reg), salt_reg);
                                 listofusers.users[listofusers.amount] = newUser;
 
                                 Console.WriteLine("[#] You have successfully registered! [#]");
-                                Console.WriteLine($"[#] Your Login: {login_reg} [#]\n[#] Password: {password_reg_str} [#]\n[#] HMAC sequence {PotentialUser} [#]\n[#] Salt: {Convert.ToBase64String(salt_reg)} [#]");
+                                Console.WriteLine($"[#] Your Login: {login_reg_str} [#]\n[#] Password: {password_reg_str} {Convert.ToBase64String(password_reg)} [#]\n[#] Salt: {Convert.ToBase64String(salt_reg)} [#]");
                                 Console.ReadKey();
 
-                                login_reg = "";
+                                login_reg_str = "";
                                 password_reg_str = "";
                                 Array.Clear(password_reg);
+                                // Array.Clear(login_reg);
                                 Array.Clear(salt_reg);
-
                                 break;
                             }
                             else
@@ -249,29 +251,40 @@ class Program
 
                         case "2":
                             Console.WriteLine("[*] Enter login [*]");
-                            string login_log = Console.ReadLine();
+                            string login_log_str = Console.ReadLine();
                             Console.WriteLine("[*] Enter new password [*]");
                             string password_log_str = Console.ReadLine();
+
+
                             for (int i = 0; i < 10; i++)
                             {
-                                if (listofusers.users[i].login == login_log)
+                                if (listofusers.users[i].login == login_log_str)
                                 {
-                                    Globals.salt = new byte[listofusers.users[i].salt.Length];
-                                    Array.Copy(listofusers.users[i].salt, Globals.salt, listofusers.users[i].salt.Length);
+                                    filter.amount++;
+                                    filter.users[filter.amount] = listofusers.users[i];
                                 }
                             }
-                            byte[] password_log = PBKDF2.Hash_Password_With_Salt_Sha256_Iteration(Encoding.Unicode.GetBytes(password_log_str), Globals.salt, 30000);
-
-                            string User = Convert.ToBase64String(Hmac.ComputeHmacsha256(Encoding.UTF8.GetBytes(login_log), password_log));
-
-                            for (int i = 0; i < 10; i++)
+                            for (int i = 0; i < filter.amount + 1; i++)
                             {
-                                if (listofusers.users[i].Hmac_seq == User)
+
+                                Globals.salt = new byte[filter.users[i].salt.Length];
+                                Array.Copy(filter.users[i].salt, Globals.salt, filter.users[i].salt.Length);
+
+                                byte[] password_log = PBKDF2.Hash_Password_With_Salt_Sha256_Iteration(Encoding.Unicode.GetBytes(password_log_str), Globals.salt, 30000);
+
+                                if (filter.users[i].login == login_log_str && filter.users[i].password == Convert.ToBase64String(password_log))
                                 {
                                     Console.WriteLine("[#] You have successfully signed in! [#]");
-                                    Console.WriteLine($"\n[#] Your Login: {login_log} [#]\n[#] Password: {password_log_str} [#]\n[#] HMAC sequence {User} [#]\n[#] Salt: {Convert.ToBase64String(listofusers.users[i].salt)} [#]");
+                                    Console.WriteLine($"[#] Your Login: {login_log_str} [#]\n[#] Password: {password_log_str} {Convert.ToBase64String(password_log)} [#]\n[#] Salt: {Convert.ToBase64String(Globals.salt)} [#]");
                                     Globals.found = true;
                                     Console.ReadKey();
+
+                                    login_log_str = "";
+                                    password_log_str = "";
+                                    Array.Clear(password_log);
+                                    Array.Clear(Globals.salt);
+                                    Array.Clear(filter.users);
+                                    filter.amount = -1;
                                     break;
                                 }
                             }
@@ -283,12 +296,8 @@ class Program
 
                             Globals.found = false;
 
-                            login_log = "";
-                            password_log_str = "";
-                            Array.Clear(password_log);
-                            Array.Clear(Globals.salt);
+
                             break;
-                        // IHBdgSOow8Fzuvi/DsU8EkbwljvHpp47eI+oToIQVtM=
                         case "3":
                             if (listofusers.amount == -1)
                             {
@@ -299,7 +308,7 @@ class Program
                             {
                                 for (int i = 0; i <= listofusers.amount; i++)
                                 {
-                                    Console.WriteLine($"[#] Id: {listofusers.users[i].id}\nLogin: {listofusers.users[i].login} \nHmac: \'{listofusers.users[i].Hmac_seq}\' \nSalt: {listofusers.users[i].salt}[#]\n\n");
+                                    Console.WriteLine($"[#] Id: {listofusers.users[i].id} Login: {listofusers.users[i].login} Password: {listofusers.users[i].password} Salt: {Convert.ToBase64String(listofusers.users[i].salt)}[#]\n");
                                 }
                                 Console.ReadKey();
                             }
