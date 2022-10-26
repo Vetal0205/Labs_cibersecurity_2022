@@ -27,11 +27,16 @@ class Crypto
 {
     public static byte[] generate_sec_random_number(int length)
     {
-        var randomNumberGenerator = new RNGCryptoServiceProvider();
-        var randomNumber = new byte[length];
-        randomNumberGenerator.GetBytes(randomNumber);
-        return randomNumber;
+        using (var randomNumberGenerator = new RNGCryptoServiceProvider())
+        {
+            var randomNumber = new byte[length];
+            // Fills the specified byte array with a cryptographically strong random sequence
+            // of values starting at a specified index for a specified number of bytes.
+            randomNumberGenerator.GetBytes(randomNumber);
+            return randomNumber;
+        }
     }
+
     public static byte[] ComputeHashMd5(byte[] dataForHash)
     {
         using (var md5 = MD5.Create())
