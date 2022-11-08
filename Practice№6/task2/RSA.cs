@@ -5,29 +5,14 @@ namespace Practice6_2
     public class RSA
     {
         private readonly static string CspContainerName = "RsaContainer";
-        // In-Memory Keys
         private static RSAParameters _publicKey, _privateKey;
-        public static void AssignNewKey(string publicKeyPath, string privateKeyPath)
+        public static void GetKey(string publicKeyPath, string? privateKeyPath)
         {
-            using (var rsa = new RSACryptoServiceProvider(2048))
+            using (var rsa = new RSACryptoServiceProvider())
             {
-                rsa.PersistKeyInCsp = false;
-                File.WriteAllText(publicKeyPath, rsa.ToXmlString(false));
-                File.WriteAllText(privateKeyPath, rsa.ToXmlString(true));
-            }
-        }
-        public static void GetKey(string publicKeyPath, string privateKeyPath)
-        {
-            using (var rsa = new RSACryptoServiceProvider(2048))
-            {
-
-                if (publicKeyPath != null)
-                {
-                    string pb = File.ReadAllText(publicKeyPath);
-                    rsa.FromXmlString(pb);
-                    _publicKey = rsa.ExportParameters(false);
-
-                }
+                string pb = File.ReadAllText(publicKeyPath);
+                rsa.FromXmlString(pb);
+                _publicKey = rsa.ExportParameters(false);
                 if (privateKeyPath != null)
                 {
                     string pr = File.ReadAllText(privateKeyPath);
@@ -35,6 +20,34 @@ namespace Practice6_2
                     _privateKey = rsa.ExportParameters(true);
                 }
             }
+        }
+        // Cryptographic Service Provider
+        public static void AssignNewKey(string publicKeyPath)
+        {
+            CspParameters cspParameters = new CspParameters(1)
+            {
+                KeyContainerName = CspContainerName,
+                Flags = CspProviderFlags.UseMachineKeyStore, //Рівень пристрою
+                ProviderName = "Microsoft Strong Cryptographic Provider"
+            };
+            using (var rsa = new RSACryptoServiceProvider(2048, cspParameters))
+            {
+                rsa.PersistKeyInCsp = true;
+                File.WriteAllText(publicKeyPath, rsa.ToXmlString(false));
+            };
+        }
+        public static void DeleteKeyInCsp()
+        {
+            CspParameters cspParameters = new CspParameters
+            {
+                KeyContainerName = CspContainerName,
+                Flags = CspProviderFlags.UseMachineKeyStore
+            };
+            var rsa = new RSACryptoServiceProvider(cspParameters)
+            {
+                PersistKeyInCsp = false
+            };
+            rsa.Clear();
         }
         public static byte[] EncryptData(byte[] dataToEncrypt)
         {
@@ -62,9 +75,10 @@ namespace Practice6_2
             };
             using (var rsa = new RSACryptoServiceProvider(cspParams))
             {
-                // rsa.PersistKeyInCsp = true;
-                rsa.ImportParameters(_privateKey);
+                rsa.PersistKeyInCsp = true;
+                // rsa.ImportParameters(_privateKey);
                 plainBytes = rsa.Decrypt(dataToDecrypt, true);
+                File.WriteAllText("./Private.xml", rsa.ToXmlString(true));
             }
             return plainBytes;
         }
