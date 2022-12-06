@@ -1,7 +1,7 @@
 using System.Security.Principal;
 using System.Security;
 using System.Collections.Generic;
-namespace Practice8
+namespace Practice9
 {
     public class Protector
     {
@@ -16,7 +16,6 @@ namespace Practice8
             {
                 throw new SecurityException("User must be a member of Admins to access this feature.");
             }
-            Console.WriteLine("You have access to this secure feature.");
         }
         public static void LogIn(string userName, string password)
         {
@@ -27,7 +26,6 @@ namespace Practice8
 
                 var principal = new GenericPrincipal(identity, _users[userName].Roles);
                 System.Threading.Thread.CurrentPrincipal = principal;
-                Console.WriteLine("You were successfuly logged in!");
             }
         }
         public static bool CheckPassword(string userName, string password)
@@ -62,7 +60,6 @@ namespace Practice8
 
             User PotentialUser = new User(userName, hashedPasswordString, salt, roles);
             _users.Add(userName, PotentialUser);
-            Console.WriteLine("You were successfuly signed in!");
         }
     }
 }
